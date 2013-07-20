@@ -30,6 +30,15 @@ public class Map {
 		FillRandom();
 	}
 	
+	public bool IsTileFree(Vector2 _pos) {
+		int x = (int)_pos.x;
+		int y = (int)_pos.y;
+		if( x < 0 || x >= width || y < 0 || y >= height)
+			return false;
+		
+		return tiles[x, y] == null;	
+	}
+	
 	public Vector2 GetFirstFreeTile() {
 		return freePos;
 	}

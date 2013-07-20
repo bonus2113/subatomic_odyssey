@@ -6,14 +6,14 @@ public class World : MonoBehaviour {
 	
 	public GameObject PlayerObj;
 	
-	Player player;
-	Map map;
+	public Player Player;
+	public Map Map;
 	
 	// Use this for initialization
 	void Start () {
-		map = new Map(50, 50, TilePrefab, gameObject);
-		player = PlayerObj.GetComponent<Player>();
-		player.SetValues(map.GetFirstFreeTile(), this);
+		Map = new Map(50, 50, TilePrefab, gameObject);
+		Player = PlayerObj.GetComponent<Player>();
+		Player.SetValues(Map.GetFirstFreeTile(), this);
 	}
 	
 	// Update is called once per frame

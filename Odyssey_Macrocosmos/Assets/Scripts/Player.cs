@@ -39,20 +39,29 @@ public class Player : MonoBehaviour {
 	
 	}
 	
+	
 	void MoveUp() {
-		SetTilePos(tilePos.x, tilePos.y + 1);	
+		Vector2 newPos = new Vector2(tilePos.x, tilePos.y + 1);
+		if(world.Map.IsTileFree(newPos))
+			SetTilePos(newPos);	
 	}
 	
 	void MoveRight() {
-		SetTilePos(tilePos.x + 1, tilePos.y);	
+		Vector2 newPos = new Vector2(tilePos.x + 1, tilePos.y);
+		if(world.Map.IsTileFree(newPos))
+			SetTilePos(newPos);	
 	}
 	
 	void MoveLeft() {
-		SetTilePos(tilePos.x - 1, tilePos.y);	
+		Vector2 newPos = new Vector2(tilePos.x - 1, tilePos.y);
+		if(world.Map.IsTileFree(newPos))
+			SetTilePos(newPos);	
 	}
 	
 	void MoveDown() {
-		SetTilePos(tilePos.x, tilePos.y - 1);	
+		Vector2 newPos = new Vector2(tilePos.x, tilePos.y - 1);
+		if(world.Map.IsTileFree(newPos))
+			SetTilePos(newPos);	
 	}
 	
 	
