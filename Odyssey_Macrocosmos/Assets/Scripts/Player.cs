@@ -26,6 +26,10 @@ public class Player : MonoBehaviour {
 		transform.position = Map.TileToWorldPos(tilePos);
 	}
 	
+	public Vector2 GetTilePos() {
+		return tilePos;	
+	}
+	
 	// Update is called once per frame
 	void Update () {
 		if(Input.GetKeyDown(KeyCode.UpArrow))

@@ -27,6 +27,7 @@ public class Map {
 		height = _height;
 		tilePrefab = _tilePrefab;
 		worldObj = _worldObj;
+		DepthSorter.MAX_Y = height * TILE_SIZE;
 		FillRandom();
 	}
 	
