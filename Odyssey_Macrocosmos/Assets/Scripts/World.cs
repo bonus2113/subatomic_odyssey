@@ -15,10 +15,13 @@ public class World : MonoBehaviour {
 	public GameObject BoxPrefab;
 	public GameObject PlayerObj;
 	public GameObject GroundPrefab;
+	public GameObject EnemyPrefab;
 	
 	public Player Player;
 	public Map Map;
 	Vector2 playerStart;
+	
+	public int Stage = 0;
 	
 	private MapNode current;
 	
@@ -43,20 +46,27 @@ public class World : MonoBehaviour {
 		}
 		
 		Map.Reset(current.Seed);
-		
+		Stage++;
 		Player = PlayerObj.GetComponent<Player>();
 		playerStart = Map.GetFirstFreeTile();
 		Player.SetValues(playerStart, this);
+		
 		
 	}
 	
 	public void GoUp() {
 		if(current.Parent != null) {
 			current = current.Parent;
+			Stage--;
 			Map.Reset(current.Seed);	
 			Player = PlayerObj.GetComponent<Player>();
 			Player.SetValues(current.ExitPos, this);
+			
 		}
+	}
+	
+	public void Step() {
+		Map.Step();
 	}
 	
 	void TeleCompleted(tk2dSpriteAnimator sprite, tk2dSpriteAnimationClip clip) {
@@ -70,10 +80,9 @@ public class World : MonoBehaviour {
 		if(boxAt != null) {
 			boxAt.PlayTele();
 			Player.PlayTele(TeleCompleted);
-			//GoDown();
 		}
 		
-		if(playerStart == Player.GetTilePos() && Input.GetKeyDown(KeyCode.Space))
+		if(playerStart == Player.GetNextTilePos())
 			GoUp();
 	}
 }

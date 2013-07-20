@@ -12,13 +12,16 @@ public class Map {
 	GameObject worldObj;
 	GameObject boxPrefab;
 	GameObject groundPrefab;
-	
+	GameObject enemyPrefab;
+	World world;
 	List<Box> boxes;
 	List<Vector2> boxPositions;
 	
 	List<Vector2> openTiles;
 	
 	List<GameObject> groundTiles;
+	
+	List<GameObject> enemies;
 	
 	Tile[,] tiles;
 	
@@ -37,8 +40,11 @@ public class Map {
 		worldObj = _worldObj;
 		groundPrefab = _world.GroundPrefab;
 		boxPrefab = _world.BoxPrefab;
+		enemyPrefab = _world.EnemyPrefab;
 		DepthSorter.MAX_Y = height * TILE_SIZE;
 		groundTiles = new List<GameObject>();
+		world = _world;
+		enemies = new List<GameObject>();
 	}
 	
 	public bool IsTileFree(Vector2 _pos) {
@@ -72,6 +78,10 @@ public class Map {
 			GameObject.Destroy(groundTile);
 		groundTiles.Clear();
 		
+		foreach(GameObject enemy in enemies)
+			GameObject.Destroy(enemy);
+		enemies.Clear();
+		
 		if(boxes == null)
 			boxes = new List<Box>();
 		foreach(Box box in boxes)
@@ -91,8 +101,10 @@ public class Map {
 		return null;
 	}
 	
-	
-	
+	public void Step() {
+		foreach(GameObject enemy in enemies)
+			enemy.GetComponent<Enemy>().Step();
+	}
 	
 	void FillRandom(int _seed) {
 		PerlinNoise noise = new PerlinNoise(_seed);
@@ -119,17 +131,20 @@ public class Map {
 					newTileObj.transform.position = pos;
 					newTileObj.transform.parent = worldObj.transform;
 					Tile newTile = newTileObj.GetComponent<Tile>();
-					newTile.SetValues(0);
+					newTile.SetValues(world.Stage);
 					tiles[x,y] = newTile;
-				} else if( tiles[x,y] == null) {
+				} else {
+				
 					openTiles.Add(new Vector2(x, y));
 					tiles[x,y] = null;	
-					
-					GameObject groundObj = (GameObject)GameObject.Instantiate(groundPrefab);
-					groundObj.transform.position = new Vector2(x, y) * TILE_SIZE;
-					groundObj.transform.parent = worldObj.transform;
-					groundTiles.Add(groundObj);
 				}
+				
+				GameObject groundObj = (GameObject)GameObject.Instantiate(groundPrefab);
+				groundObj.transform.position = new Vector2(x, y) * TILE_SIZE;
+				groundObj.transform.parent = worldObj.transform;
+				groundTiles.Add(groundObj);
+				groundObj.GetComponent<Tile>().SetGround(world.Stage);
+			
 				
 			}
 		}
@@ -147,6 +162,20 @@ public class Map {
 			newBoxObj.transform.parent = worldObj.transform;
 			Box newBox = newBoxObj.GetComponent<Box>();
 			boxes.Add(newBox);
+		}
+		
+		int enemyCount = 40;
+		
+		for(int i = 0; i < enemyCount && openTiles.Count > 0; i++) {
+			int index = (int)(Random.value * openTiles.Count);
+			Vector2 boxPos = openTiles[index];
+			openTiles.RemoveAt(index);
+			GameObject newBoxObj = (GameObject)GameObject.Instantiate(enemyPrefab);
+			newBoxObj.transform.position = boxPos * TILE_SIZE;
+			newBoxObj.transform.parent = worldObj.transform;
+			enemies.Add(newBoxObj);
+			newBoxObj.GetComponent<Enemy>().SetValues(world.Stage, world);
+			newBoxObj.GetComponent<Enemy>().SetTilePos(boxPos);
 		}
 		
 	}

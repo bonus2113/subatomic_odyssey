@@ -47,6 +47,7 @@ public class Player : MonoBehaviour {
 		nextTilePos = _tile;
 		walkTimer = WALK_TIME;
 		state = State.Walking;
+		world.Step();
 	}
 	
 	public Vector2 GetNextTilePos() {
