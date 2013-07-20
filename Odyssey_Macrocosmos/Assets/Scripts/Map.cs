@@ -51,6 +51,8 @@ public class Map {
 		float widthDivisor = 10.0f / (float)width;
     	float heightDivisor = 10.0f / (float)height;
 		
+		
+		
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				
@@ -62,7 +64,7 @@ public class Map {
 	                // Third octave
 	                (noise.Noise(8 * x * widthDivisor, 8 * y * heightDivisor, +0.5f) + 1) / 2 * 0.1f;
 					
-				if(val < 0.47f) {
+				if(val < 0.47f || x == 0 || y == 0 || x == width - 1 || y == height - 1) {
 					Vector2 pos = new Vector2(x, y) * TILE_SIZE;
 					GameObject newTileObj = (GameObject)GameObject.Instantiate(tilePrefab);
 					newTileObj.transform.position = pos;
@@ -70,7 +72,7 @@ public class Map {
 					Tile newTile = newTileObj.GetComponent<Tile>();
 					newTile.SetValues(0);
 					tiles[x,y] = newTile;
-				} else {
+				} else if( tiles[x,y] == null) {
 					if(freePos == Vector2.zero)
 						freePos = new Vector2(x, y);
 					tiles[x,y] = null;	

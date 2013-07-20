@@ -15,7 +15,8 @@ public class Player : MonoBehaviour {
 	
 	enum State {
 		Standing,
-		Walking
+		Walking,
+		TeleportingIn
 	}
 	
 	State state = State.Standing;
@@ -43,8 +44,6 @@ public class Player : MonoBehaviour {
 	public void MoveTo(Vector2 _tile) {
 		nextTilePos = _tile;
 		walkTimer = WALK_TIME;
-		if(state != State.Walking)
-			anim.Play("Walk");
 		state = State.Walking;
 	}
 	
@@ -63,10 +62,17 @@ public class Player : MonoBehaviour {
 			
 			if(walkTimer <= 0)
 			{
+				bool movedX = nextTilePos.x - tilePos.x != 0 || nextTilePos.y > tilePos.y;
 				SetTilePos(nextTilePos);
 				CheckKeys();
-				if(state == State.Standing)
-					anim.Play("Idle");
+				if(state == State.Standing) {
+					if(movedX)
+						anim.Play("IdleSide");
+					else
+						anim.Play("IdleDown");
+						
+				}
+				
 			}
 		}
 	
@@ -88,26 +94,41 @@ public class Player : MonoBehaviour {
 	
 	void MoveUp() {
 		Vector2 newPos = new Vector2(tilePos.x, tilePos.y + 1);
-		if(world.Map.IsTileFree(newPos))
+		if(world.Map.IsTileFree(newPos)) {
+			if(state != State.Walking|| anim.CurrentClip.name != "WalkSide")
+				anim.Play("WalkSide");
 			MoveTo(newPos);	
+		}
 	}
 	
 	void MoveRight() {
 		Vector2 newPos = new Vector2(tilePos.x + 1, tilePos.y);
-		if(world.Map.IsTileFree(newPos))
-			MoveTo(newPos);	
+		if(world.Map.IsTileFree(newPos)) {
+			anim.Sprite.FlipX = false;
+			if(state != State.Walking || anim.CurrentClip.name != "WalkSide")
+				anim.Play("WalkSide");
+			MoveTo(newPos);
+		}	
 	}
 	
 	void MoveLeft() {
 		Vector2 newPos = new Vector2(tilePos.x - 1, tilePos.y);
-		if(world.Map.IsTileFree(newPos))
-			MoveTo(newPos);	
+		if(world.Map.IsTileFree(newPos)) {
+			anim.Sprite.FlipX = true;
+			if(state != State.Walking|| anim.CurrentClip.name != "WalkSide")
+				anim.Play("WalkSide");
+			MoveTo(newPos);
+		}
 	}
 	
 	void MoveDown() {
 		Vector2 newPos = new Vector2(tilePos.x, tilePos.y - 1);
-		if(world.Map.IsTileFree(newPos))
-			MoveTo(newPos);	
+		if(world.Map.IsTileFree(newPos)) {
+			anim.Sprite.FlipX = false;
+			if(state != State.Walking|| anim.CurrentClip.name != "WalkDown")
+				anim.Play("WalkDown");
+			MoveTo(newPos);
+		}
 	}
 	
 	
