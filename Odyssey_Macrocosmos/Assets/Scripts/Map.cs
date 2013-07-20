@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Map {
 	
@@ -9,8 +10,12 @@ public class Map {
 	int height;
 	GameObject tilePrefab;
 	GameObject worldObj;
+	GameObject boxPrefab;
 	
-	Vector2 freePos = Vector2.zero;
+	List<Box> boxes;
+	List<Vector2> boxPositions;
+	
+	List<Vector2> openTiles;
 	
 	Tile[,] tiles;
 	
@@ -22,13 +27,13 @@ public class Map {
 		return _world / TILE_SIZE;	
 	}
 	
-	public Map(int _width, int _height, GameObject _tilePrefab, GameObject _worldObj) {
+	public Map(int _width, int _height, GameObject _worldObj, World _world) {
 		width = _width;
 		height = _height;
-		tilePrefab = _tilePrefab;
+		tilePrefab = _world.TilePrefab;
 		worldObj = _worldObj;
+		boxPrefab = _world.BoxPrefab;
 		DepthSorter.MAX_Y = height * TILE_SIZE;
-		FillRandom();
 	}
 	
 	public bool IsTileFree(Vector2 _pos) {
@@ -41,18 +46,50 @@ public class Map {
 	}
 	
 	public Vector2 GetFirstFreeTile() {
-		return freePos;
+		return openTiles[0];
+	}
+	
+	public void Reset(int _seed) {
+		if(tiles == null)
+			tiles = new Tile[width, height];
+		
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(tiles[x,y] != null) {
+					GameObject.Destroy(tiles[x,y].gameObject);
+					tiles[x,y] = null;
+				}
+			}
+		}
+		
+		if(boxes == null)
+			boxes = new List<Box>();
+		foreach(Box box in boxes)
+			GameObject.Destroy(box.gameObject);
+		
+		if(boxPositions == null)
+			boxPositions = new List<Vector2>();
+		boxPositions.Clear();
+		boxes.Clear();
+		FillRandom(_seed);
+	}
+	
+	public bool IsBoxPos(Vector2 _pos) {
+		foreach(Vector2 boxPos in boxPositions)
+			if(_pos == boxPos)
+				return true;
+		return false;
 	}
 	
 	
-	void FillRandom() {
-		PerlinNoise noise = new PerlinNoise(1);
-		tiles = new Tile[width, height];
+	void FillRandom(int _seed) {
+		PerlinNoise noise = new PerlinNoise(_seed);
+		
 		float widthDivisor = 10.0f / (float)width;
     	float heightDivisor = 10.0f / (float)height;
 		
-		
-		
+		openTiles = new List<Vector2>();
+
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				
@@ -73,13 +110,28 @@ public class Map {
 					newTile.SetValues(0);
 					tiles[x,y] = newTile;
 				} else if( tiles[x,y] == null) {
-					if(freePos == Vector2.zero)
-						freePos = new Vector2(x, y);
+					openTiles.Add(new Vector2(x, y));
 					tiles[x,y] = null;	
 				}
 				
 			}
 		}
+		
+		int boxCount = 3;
+		boxes = new List<Box>();
+		
+		for(int i = 0; i < boxCount; i++) {
+			int index = (int)(Random.value * openTiles.Count);
+			Vector2 boxPos = openTiles[index];
+			openTiles.RemoveAt(index);
+			boxPositions.Add(boxPos);
+			GameObject newBoxObj = (GameObject)GameObject.Instantiate(boxPrefab);
+			newBoxObj.transform.position = boxPos * TILE_SIZE;
+			newBoxObj.transform.parent = worldObj.transform;
+			Box newBox = newBoxObj.GetComponent<Box>();
+			boxes.Add(newBox);
+		}
+		
 	}
 	
 }
