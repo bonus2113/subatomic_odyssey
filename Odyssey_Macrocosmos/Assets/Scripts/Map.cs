@@ -44,11 +44,25 @@ public class Map {
 		return freePos;
 	}
 	
+	
 	void FillRandom() {
+		PerlinNoise noise = new PerlinNoise(1);
 		tiles = new Tile[width, height];
+		float widthDivisor = 10.0f / (float)width;
+    	float heightDivisor = 10.0f / (float)height;
+		
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				if(Random.value < 0.5f) {
+				
+				float val =
+	                // First octave
+	                (noise.Noise(2 * x * widthDivisor, 2 * y * heightDivisor, -0.5f) + 1) / 2 * 0.7f +
+	                // Second octave
+	                (noise.Noise(4 * x * widthDivisor, 4 * y * heightDivisor, 0) + 1) / 2 * 0.2f +
+	                // Third octave
+	                (noise.Noise(8 * x * widthDivisor, 8 * y * heightDivisor, +0.5f) + 1) / 2 * 0.1f;
+					
+				if(val < 0.47f) {
 					Vector2 pos = new Vector2(x, y) * TILE_SIZE;
 					GameObject newTileObj = (GameObject)GameObject.Instantiate(tilePrefab);
 					newTileObj.transform.position = pos;
