@@ -8,14 +8,17 @@ public class World : MonoBehaviour {
 		public int Seed;
 		public List<MapNode> Children;
 		public MapNode Parent;
+		public Vector2 ExitPos;
 	}
 	
 	public GameObject TilePrefab;
 	public GameObject BoxPrefab;
 	public GameObject PlayerObj;
+	public GameObject GroundPrefab;
 	
 	public Player Player;
 	public Map Map;
+	Vector2 playerStart;
 	
 	private MapNode current;
 	
@@ -34,13 +37,17 @@ public class World : MonoBehaviour {
 		current.Seed = newSeed;
 		current.Parent = last;
 		current.Children = new List<MapNode>();
-		if(last != null)
+		if(last != null) {
 			last.Children.Add(current);
+			last.ExitPos = Player.GetTilePos();	
+		}
 		
 		Map.Reset(current.Seed);
 		
 		Player = PlayerObj.GetComponent<Player>();
-		Player.SetValues(Map.GetFirstFreeTile(), this);
+		playerStart = Map.GetFirstFreeTile();
+		Player.SetValues(playerStart, this);
+		
 	}
 	
 	public void GoUp() {
@@ -48,13 +55,25 @@ public class World : MonoBehaviour {
 			current = current.Parent;
 			Map.Reset(current.Seed);	
 			Player = PlayerObj.GetComponent<Player>();
-			Player.SetValues(Map.GetFirstFreeTile(), this);
+			Player.SetValues(current.ExitPos, this);
 		}
 	}
 	
+	void TeleCompleted(tk2dSpriteAnimator sprite, tk2dSpriteAnimationClip clip) {
+        GoDown();
+    }
+
+	
 	// Update is called once per frame
 	void Update () {
-		if(Map.IsBoxPos(Player.GetTilePos()))
-			GoDown();
+		Box boxAt = Map.IsBoxPos(Player.GetNextTilePos());
+		if(boxAt != null) {
+			boxAt.PlayTele();
+			Player.PlayTele(TeleCompleted);
+			//GoDown();
+		}
+		
+		if(playerStart == Player.GetTilePos() && Input.GetKeyDown(KeyCode.Space))
+			GoUp();
 	}
 }

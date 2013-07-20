@@ -16,7 +16,7 @@ public class Player : MonoBehaviour {
 	enum State {
 		Standing,
 		Walking,
-		TeleportingIn
+		Teleporting
 	}
 	
 	State state = State.Standing;
@@ -27,6 +27,8 @@ public class Player : MonoBehaviour {
 	}
 	
 	public void SetValues(Vector2 _pos, World _world) {
+		anim.Play("IdleDown");
+		state = State.Standing;
 		SetTilePos(_pos);
 		world = _world;
 	}
@@ -47,6 +49,10 @@ public class Player : MonoBehaviour {
 		state = State.Walking;
 	}
 	
+	public Vector2 GetNextTilePos() {
+		return nextTilePos;	
+	}
+	
 	public Vector2 GetTilePos() {
 		return tilePos;	
 	}
@@ -55,11 +61,12 @@ public class Player : MonoBehaviour {
 	void Update () {
 		
 		if(state == State.Standing) {
+			anim.AnimationCompleted = null;
 			CheckKeys();
-		} else {
+		} else if(state == State.Walking) {
 			walkTimer -= Time.deltaTime;
 			transform.position = Vector2.Lerp(tilePos * Map.TILE_SIZE, nextTilePos * Map.TILE_SIZE, (WALK_TIME - walkTimer)/WALK_TIME);
-			
+			anim.AnimationCompleted = null;
 			if(walkTimer <= 0)
 			{
 				bool movedX = nextTilePos.x - tilePos.x != 0 || nextTilePos.y > tilePos.y;
@@ -89,6 +96,12 @@ public class Player : MonoBehaviour {
 			MoveDown();
 		else
 			state = State.Standing;
+	}
+	
+	public void PlayTele(System.Action<tk2dSpriteAnimator,tk2dSpriteAnimationClip> _completed) {
+		state = State.Teleporting;
+		anim.Play("Teleport");
+		anim.AnimationCompleted = _completed;
 	}
 	
 	
