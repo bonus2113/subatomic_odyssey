@@ -22,6 +22,8 @@ public class CameraController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		SetTilePos(player.GetTilePos());
+		Vector2 worldPos = player.transform.position;
+		transform.position = new Vector3(worldPos.x, worldPos.y, -10) - 
+			new Vector3(Map.TILE_SIZE + Screen.width, Map.TILE_SIZE + Screen.height, 0)/2;
 	}
 }
