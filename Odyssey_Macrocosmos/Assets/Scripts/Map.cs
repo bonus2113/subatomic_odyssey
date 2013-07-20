@@ -11,11 +11,14 @@ public class Map {
 	GameObject tilePrefab;
 	GameObject worldObj;
 	GameObject boxPrefab;
+	GameObject groundPrefab;
 	
 	List<Box> boxes;
 	List<Vector2> boxPositions;
 	
 	List<Vector2> openTiles;
+	
+	List<GameObject> groundTiles;
 	
 	Tile[,] tiles;
 	
@@ -32,8 +35,10 @@ public class Map {
 		height = _height;
 		tilePrefab = _world.TilePrefab;
 		worldObj = _worldObj;
+		groundPrefab = _world.GroundPrefab;
 		boxPrefab = _world.BoxPrefab;
 		DepthSorter.MAX_Y = height * TILE_SIZE;
+		groundTiles = new List<GameObject>();
 	}
 	
 	public bool IsTileFree(Vector2 _pos) {
@@ -46,7 +51,8 @@ public class Map {
 	}
 	
 	public Vector2 GetFirstFreeTile() {
-		return openTiles[0];
+		int index = (int)(Random.value * openTiles.Count);
+		return openTiles[index];
 	}
 	
 	public void Reset(int _seed) {
@@ -62,6 +68,10 @@ public class Map {
 			}
 		}
 		
+		foreach(GameObject groundTile in groundTiles)
+			GameObject.Destroy(groundTile);
+		groundTiles.Clear();
+		
 		if(boxes == null)
 			boxes = new List<Box>();
 		foreach(Box box in boxes)
@@ -74,12 +84,14 @@ public class Map {
 		FillRandom(_seed);
 	}
 	
-	public bool IsBoxPos(Vector2 _pos) {
-		foreach(Vector2 boxPos in boxPositions)
-			if(_pos == boxPos)
-				return true;
-		return false;
+	public Box IsBoxPos(Vector2 _pos) {
+		for( int i = 0; i < boxPositions.Count; i++)
+			if(_pos == boxPositions[i])
+				return boxes[i];
+		return null;
 	}
+	
+	
 	
 	
 	void FillRandom(int _seed) {
@@ -112,12 +124,17 @@ public class Map {
 				} else if( tiles[x,y] == null) {
 					openTiles.Add(new Vector2(x, y));
 					tiles[x,y] = null;	
+					
+					GameObject groundObj = (GameObject)GameObject.Instantiate(groundPrefab);
+					groundObj.transform.position = new Vector2(x, y) * TILE_SIZE;
+					groundObj.transform.parent = worldObj.transform;
+					groundTiles.Add(groundObj);
 				}
 				
 			}
 		}
 		
-		int boxCount = 3;
+		int boxCount = 10;
 		boxes = new List<Box>();
 		
 		for(int i = 0; i < boxCount; i++) {
