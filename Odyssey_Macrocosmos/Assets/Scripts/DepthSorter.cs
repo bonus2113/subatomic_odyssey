@@ -11,6 +11,6 @@ public class DepthSorter : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, transform.localPosition.y / MAX_Y);
+		transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, transform.localPosition.y / MAX_Y * 10.0f);
 	}
 }
