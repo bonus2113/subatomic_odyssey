@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Map {
 	
-	public const int TILE_SIZE = 64;	
+	public const int TILE_SIZE = 64;
 	
 	int width;
 	int height;
